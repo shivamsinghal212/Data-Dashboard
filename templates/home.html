@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.css">
+</head>
+<body>
+<br><br>
+<div class="container-fluid">
+<div class="row">
+<div class="col-sm-3">
+    <div class="card"><h5>Select a property and click 'Go'</h5></div>
+<br><br>
+<div class="jumbotron">
+    <form action="{% url 'home' %}" method="post">{% csrf_token %}
+         <input type="radio" name="get_property" value="topic" checked><b>Topic</b><br>
+        <select class="form-control" id="topic" name="get_topic">
+            <option value = "All">All</option>
+            {% for k in topic %}
+                <option value="{{ k }}">{{ k }}</option>
+            {% endfor  %}
+        </select><br>
+        <input type="radio" name="get_property" value="sector" ><b>Sector</b><br>
+        <select class="form-control" id="sector" name="get_sector">
+            <option value = "All">All</option>
+            {% for k in sector %}
+                <option value="{{ k }}">{{ k }}</option>
+            {% endfor  %}
+        </select><br>
+        <input type="radio" name="get_property" value="region" ><b>Region</b><br>
+        <select class="form-control" id="region" name="get_region">
+            <option value = "All">All</option>
+            {% for k in region %}
+                <option value="{{ k }}">{{ k }}</option>
+            {% endfor  %}
+        </select><br>
+        <input type="radio" name="get_property" value="pestle" ><b>Pestle</b><br>
+        <select class="form-control" id="pestle" name="get_pestle">
+            <option value = "All">All</option>
+            {% for k in pestle %}
+                <option value="{{ k }}">{{ k }}</option>
+            {% endfor  %}
+        </select><br>
+        <input type="radio" name="get_property" value="start_year" ><b>Year</b><br>
+        <select class="form-control" id="year" name="get_year">
+            <option value = "All">All</option>
+            {% for k in year %}
+                <option value="{{ k }}">{{ k }}</option>
+            {% endfor  %}
+        </select><br>
+    <div>
+        <button class="btn btn-success" type="submit" name="submit">Go</button>
+    </div>
+    </form>
+</div>
+</div>
+    <div class="col">
+    <div class="jumbotron">
+        <div id="spider" style="min-width: 200px; max-width: 900px; height: 600px; margin: auto"></div>
+    </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        <div class="jumbotron">
+        <table id="table_id" class="display">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Topic</th>
+            <th>Year</th>
+            <th>Intensity</th>
+            <th>Region</th>
+            <th>Sector</th>
+            <th>Pestle</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for data in table_data %}
+        <tr>
+
+            <td>{{ data.title }}</td>
+            <td>{{ data.topic }}</td>
+            <td>{{ data.start_year }}</td>
+            <td>{{ data.intensity }}</td>
+            <td>{{ data.region }}</td>
+            <td>{{ data.sector }}</td>
+            <td>{{ data.pestle }}</td>
+
+
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+        </div>
+    </div>
+</div>
+</div>
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/highcharts-more.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script type="text/javascript">
+    $(document).ready( function () {
+    $('#table_id').DataTable();
+} );
+</script>
+<script type="text/javascript">
+    Highcharts.chart('spider', {
+
+    chart: {
+        polar: true,
+        type: 'line'
+    },
+
+    title: {
+        text: '{{ property }}: {{ prop_value }}',
+        x: -50
+    },
+
+    pane: {
+        size: '90%'
+    },
+
+    xAxis: {
+        categories: [
+            {% for k,v in data_int.items %}
+                '{{ k }}',
+            {% endfor %}
+        ],
+        tickmarkPlacement: 'on',
+        lineWidth: 0
+    },
+
+    yAxis: {
+        gridLineInterpolation: 'polygon',
+        lineWidth: 0,
+        min: 0
+    },
+
+    tooltip: {
+        shared: true,
+        pointFormat: '<span style="color:{series.color}">{series.name}: <b>{point.y:,.f}</b><br/>'
+    },
+
+    legend: {
+        align: 'center',
+        verticalAlign: 'top',
+        y: 30,
+        layout: 'horizontal'
+    },
+
+    series: [{
+        name: 'Intensity',
+        data: [
+            {% for k,v in data_int.items %}
+                {{ v }},
+            {% endfor %}
+        ],
+        pointPlacement: 'on'
+    },
+        {% if data_rel %}
+    {
+        name: 'Relevance',
+        data: [
+            {% for k,v in data_rel.items %}
+                {{ v }},
+            {% endfor %}
+        ],
+        pointPlacement: 'on'
+    }   {% endif %},
+        {% if data_like %}
+    {
+        name: 'Likelihood',
+        data: [
+            {% for k,v in data_like.items %}
+                {{ v }},
+            {% endfor %}
+        ],
+        pointPlacement: 'on'
+    }   {% endif %}
+    ]
+
+});
+
+</script>
+</body>
+</html>
